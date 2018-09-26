@@ -4,9 +4,9 @@ import trio
 
 class Dispatcher:
 
-    def __init__(self, event_gen, q_size=1, n_workers=1):
-        self._event_gen = event_gen
-        self._events = trio.Queue(q_size)
+    def __init__(self, event_generator, q_size=1, n_workers=1):
+        self._event_generator = event_generator
+        self._event_queue = trio.Queue(q_size)
         self._n_workers = n_workers
         self._event_handlers = defaultdict(list)
 
@@ -29,11 +29,11 @@ class Dispatcher:
         self._event_handlers[event_type].append(event_handler)
 
     async def _producer(self):
-        async for event in await self._event_gen:
-            await self._events.put(event)
+        async for event in await self._event_generator:
+            await self._event_queue.put(event)
 
     async def _consumer(self):
-        async for event in self._events:
+        async for event in self._event_queue:
             await self._dispatch(event)
 
     async def _dispatch(self, event):

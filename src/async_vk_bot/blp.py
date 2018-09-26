@@ -13,12 +13,11 @@ class BotsLongPoll:
         self.wait = wait
 
     def __aiter__(self):
-        return self._event_gen()
+        return self._event_generator()
 
-    async def _event_gen(self):
+    async def _event_generator(self):
         while True:
-            events = await self._get_events()
-            for event in events:
+            for event in await self._get_events():
                 yield event
 
     async def _get_events(self):
