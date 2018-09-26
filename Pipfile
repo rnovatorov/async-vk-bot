@@ -4,8 +4,6 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-trio = "*"
-asks = "*"
 async-vk-api = {editable = true, git = "https://github.com/Suenweek/async-vk-api"}
 
 [dev-packages]

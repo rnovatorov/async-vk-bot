@@ -1,5 +1,4 @@
 import async_vk_api as vk
-vk.init('trio')
 
 from . import blp
 from .dispatcher import Dispatcher

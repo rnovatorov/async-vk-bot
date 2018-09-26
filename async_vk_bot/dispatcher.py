@@ -11,10 +11,10 @@ class Dispatcher:
         self._event_handlers = defaultdict(list)
 
     async def __call__(self):
-        await self._run()
-
-    def add_event_handler(self, event_type, event_handler):
-        self._event_handlers[event_type].append(event_handler)
+        async with trio.open_nursery() as nursery:
+            nursery.start_soon(self._producer)
+            for _ in range(self._n_workers):
+                nursery.start_soon(self._consumer)
 
     def on(self, event_type):
         """
@@ -25,11 +25,8 @@ class Dispatcher:
             return func
         return decorator
 
-    async def _run(self):
-        async with trio.open_nursery() as nursery:
-            nursery.start_soon(self._producer)
-            for _ in range(self._n_workers):
-                nursery.start_soon(self._consumer)
+    def add_event_handler(self, event_type, event_handler):
+        self._event_handlers[event_type].append(event_handler)
 
     async def _producer(self):
         async for event in await self._event_gen:
