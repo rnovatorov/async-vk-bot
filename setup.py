@@ -1,13 +1,23 @@
-from setuptools import setup
+import os
+from codecs import open
+from setuptools import setup, find_packages
+
+
+here_dir = os.path.abspath(os.path.dirname(__file__))
+about = {}
+with open(os.path.join(here_dir, 'src', 'async_vk_bot', '__about__.py')) as f:
+    exec(f.read(), about)
+
 
 setup(
-    name='async-vk-bot',
-    version='0.0.2',
-    description='Async VK bot builder',
-    py_modules=['async_vk_bot'],
-    url='https://github.com/Suenweek/async-vk-bot',
-    author='Roman Novatorov',
-    author_email='roman.novatorov@gmail.com',
+    name=about['__title__'],
+    version=about['__version__'],
+    description=about['__description__'],
+    packages=find_packages('src'),
+    package_dir={'': 'src'},
+    url=about['__url__'],
+    author=about['__author__'],
+    author_email=about['__author_email__'],
     install_requires=['async-vk-api'],
     dependency_links=['https://github.com/Suenweek/async-vk-api#egg=async-vk-api']
 )
