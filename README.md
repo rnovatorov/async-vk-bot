@@ -2,8 +2,7 @@
 
 Async VK bot builder built with
 [trio](https://github.com/python-trio/trio)
-and
-[async-vk-api](https://github.com/Suenweek/async-vk-api).
+and [async-vk-api](https://github.com/Suenweek/async-vk-api).
 
 
 ## Installation
@@ -31,3 +30,6 @@ async def echo(obj):
 if __name__ == '__main__':
     trio.run(bot)
 ```
+
+For the list of possible event types see
+https://vk.com/dev/groups_events.
