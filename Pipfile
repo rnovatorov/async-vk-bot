@@ -6,9 +6,10 @@ name = "pypi"
 [packages]
 trio = "*"
 asks = "*"
-async-vk-api = {editable = true, path = "D:/mystuff/projects/async-vk-api"}
+async-vk-api = {editable = true, git = "https://github.com/Suenweek/async-vk-api"}
 
 [dev-packages]
+async-vk-bot = {editable = true, path = "."}
 
 [requires]
 python_version = "3.7"

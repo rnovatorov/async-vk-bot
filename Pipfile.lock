@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "4bb8be4e884c58930a27dd785a7a58b16102b9df0b500a07ae4b908bd622b1c2"
+            "sha256": "22610ce33599533f68eec09f5ab22b399a28086ad50ece91575cff740611c634"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -33,7 +33,8 @@
         },
         "async-vk-api": {
             "editable": true,
-            "path": "D:/mystuff/projects/async-vk-api"
+            "git": "https://github.com/Suenweek/async-vk-api",
+            "ref": "f8190829fe54067e83ea05b6d4ba03f33c5f53de"
         },
         "attrs": {
             "hashes": [

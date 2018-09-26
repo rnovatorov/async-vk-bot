@@ -12,10 +12,16 @@ class BotsLongPoll:
         self.ts = ts
         self.wait = wait
 
-    async def __call__(self):
-        return await self.get_events()
+    def __aiter__(self):
+        return self._event_gen()
 
-    async def get_events(self):
+    async def _event_gen(self):
+        while True:
+            events = await self._get_events()
+            for event in events:
+                yield event
+
+    async def _get_events(self):
         url = self._make_url()
         response = await asks.get(url)
         payload = response.json()
@@ -32,9 +38,9 @@ class BotsLongPoll:
         })
         return '?'.join([self.server, query])
 
-    @classmethod
-    async def connect(cls, vk_api):
-        groups = await vk_api.groups.getById()
-        group_id = groups[0]['id']
-        blp_cfg = await vk_api.groups.getLongPollServer(group_id=group_id)
-        return cls(**blp_cfg)
+
+async def connect(vk_api):
+    groups = await vk_api.groups.getById()
+    group_id = groups[0]['id']
+    blp_cfg = await vk_api.groups.getLongPollServer(group_id=group_id)
+    return BotsLongPoll(**blp_cfg)
