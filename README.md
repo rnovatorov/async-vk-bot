@@ -31,5 +31,5 @@ if __name__ == '__main__':
     trio.run(bot)
 ```
 
-For the list of possible event types see
+For the list of event types and objects see
 https://vk.com/dev/groups_events.
