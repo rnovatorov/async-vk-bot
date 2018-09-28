@@ -18,6 +18,5 @@ setup(
     url=about['__url__'],
     author=about['__author__'],
     author_email=about['__author_email__'],
-    install_requires=['async-vk-api'],
-    dependency_links=['https://github.com/Suenweek/async-vk-api#egg=async-vk-api']
+    install_requires=['async-vk-api']
 )
