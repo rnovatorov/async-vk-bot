@@ -2,7 +2,25 @@ import asks
 from urllib.parse import urlencode
 
 
-class BotsLongPoll:
+class Poller:
+
+    def __init__(self, vk):
+        self._vk = vk
+
+    async def __call__(self):
+        server = await self._get_server()
+        async for events in server:
+            for event in events:
+                yield event
+
+    async def _get_server(self):
+        groups = await self._vk.groups.getById()
+        group_id = groups[0]['id']
+        cfg = await self._vk.groups.getLongPollServer(group_id=group_id)
+        return Server(**cfg)
+
+
+class Server:
 
     ACT = 'a_check'
 
@@ -13,18 +31,15 @@ class BotsLongPoll:
         self.wait = wait
 
     def __aiter__(self):
-        return self._event_generator()
+        return self
 
-    async def _event_generator(self):
-        while True:
-            for event in await self._get_events():
-                yield event
+    async def __anext__(self):
+        return await self.get_events()
 
-    async def _get_events(self):
+    async def get_events(self):
         url = self._make_url()
         response = await asks.get(url)
         payload = response.json()
-
         self.ts = payload['ts']
         return payload['updates']
 
@@ -36,10 +51,3 @@ class BotsLongPoll:
             'wait': self.wait
         })
         return '?'.join([self.server, query])
-
-
-async def connect(vk_api):
-    groups = await vk_api.groups.getById()
-    group_id = groups[0]['id']
-    blp_cfg = await vk_api.groups.getLongPollServer(group_id=group_id)
-    return BotsLongPoll(**blp_cfg)
