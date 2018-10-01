@@ -9,4 +9,4 @@ class Bot(Dispatcher):
     def __init__(self):
         self.vk = vk.Api()
         poller = Poller(self.vk)
-        super().__init__(poller)
+        super().__init__(events=poller())
