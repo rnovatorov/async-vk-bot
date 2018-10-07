@@ -8,6 +8,8 @@ async-vk-api = "*"
 
 [dev-packages]
 async-vk-bot = {editable = true, path = "."}
+pytest = "*"
+pytest-trio = "*"
 
 [requires]
 python_version = "3.7"

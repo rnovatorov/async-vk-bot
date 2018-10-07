@@ -21,10 +21,10 @@ from async_vk_bot import Bot
 bot = Bot()
 
 @bot.on('message_new')
-async def echo(obj):
+async def echo(msg):
     await bot.vk.messages.send(
-        peer_id=obj['peer_id'],
-        message=obj['text']
+        peer_id=msg['peer_id'],
+        message=msg['text']
     )
 
 if __name__ == '__main__':
