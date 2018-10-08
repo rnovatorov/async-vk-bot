@@ -1,25 +1,35 @@
-from collections import defaultdict
+import time
+from contextlib import contextmanager
+
 import trio
 
 
 class Dispatcher:
 
-    def __init__(self, events):
-        self._events = events
-        self._handlers = defaultdict(list)
+    def __init__(self, event_gen):
+        self._event_gen = event_gen
+        self._subs = {}
 
     async def __call__(self):
-        async with trio.open_nursery() as nursery:
-            async for event in self._events:
-                for handler in self._handlers[event['type']]:
-                    nursery.start_soon(handler, event['object'])
+        async for event in self._event_gen():
+            await self.pub(event)
 
-    def on(self, event_type):
-        """Decorator version of `self.add_handler`."""
-        def decorator(func):
-            self.add_handler(event_type, func)
-            return func
-        return decorator
+    async def pub(self, event):
+        for bucket in list(self._subs.values()):
+            await bucket.put(event)
 
-    def add_handler(self, event_type, event_handler):
-        self._handlers[event_type].append(event_handler)
+    async def sub(self, predicate):
+        with self._bucket() as bucket:
+            async for event in bucket:
+                if predicate(event):
+                    return event
+
+    @contextmanager
+    def _bucket(self):
+        ts = time.monotonic()
+        bucket = trio.Queue(0)
+        self._subs[ts] = bucket
+        try:
+            yield bucket
+        finally:
+            del self._subs[ts]

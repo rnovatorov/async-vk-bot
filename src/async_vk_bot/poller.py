@@ -3,8 +3,8 @@ from .server import Server
 
 class Poller:
 
-    def __init__(self, vk):
-        self._vk = vk
+    def __init__(self, api):
+        self._api = api
 
     async def __call__(self):
         server = await self._get_server()
@@ -13,7 +13,7 @@ class Poller:
                 yield event
 
     async def _get_server(self):
-        groups = await self._vk.groups.getById()
+        groups = await self._api.groups.getById()
         group_id = groups[0]['id']
-        cfg = await self._vk.groups.getLongPollServer(group_id=group_id)
+        cfg = await self._api.groups.getLongPollServer(group_id=group_id)
         return Server(**cfg)

@@ -1,4 +1,5 @@
 import trio
+import pytest
 
 from async_vk_bot.dispatcher import Dispatcher
 
@@ -7,64 +8,35 @@ EVENT_TYPE = 'event_type'
 EVENT_OBJECT = 42
 
 
-async def single_event():
+async def event_gen():
     await trio.sleep(1)
     yield {
         'type': EVENT_TYPE,
         'object': EVENT_OBJECT
     }
-    await trio.sleep(1)
 
 
-async def multiple_events(n):
-    for _ in range(n):
-        yield await single_event().__anext__()
+async def test_single_sub_true_predicate(nursery, autojump_clock):
+    dispatcher = Dispatcher(event_gen=event_gen)
+
+    def predicate(event):
+        assert event['type'] == EVENT_TYPE
+        assert event['object'] == EVENT_OBJECT
+        return True
+
+    nursery.start_soon(dispatcher)
+    await dispatcher.sub(predicate)
 
 
-async def test_single_event_to_single_handler(autojump_clock):
-    dispatcher = Dispatcher(events=single_event())
+async def test_single_sub_false_predicate(nursery, autojump_clock):
+    dispatcher = Dispatcher(event_gen=event_gen)
 
-    @dispatcher.on(EVENT_TYPE)
-    async def handler(obj):
-        assert obj == EVENT_OBJECT
+    def predicate(event):
+        assert event['type'] == EVENT_TYPE
+        assert event['object'] == EVENT_OBJECT
+        return False
 
-    await dispatcher()
-
-
-async def test_single_event_to_multiple_handlers(autojump_clock):
-    n_handlers = 4
-    handler_calls = 0
-
-    dispatcher = Dispatcher(events=single_event())
-
-    async def handler(obj):
-        nonlocal handler_calls
-        handler_calls += 1
-        assert obj == EVENT_OBJECT
-
-    for _ in range(n_handlers):
-        dispatcher.add_handler(EVENT_TYPE, handler)
-
-    await dispatcher()
-
-    assert handler_calls == n_handlers
-
-
-async def test_multiple_events_to_multiple_handlers(autojump_clock):
-    n_events = 4
-    n_handlers = 4
-    handler_calls = 0
-
-    dispatcher = Dispatcher(events=multiple_events(n=n_events))
-
-    async def handler(obj):
-        nonlocal handler_calls
-        handler_calls += 1
-        assert obj == EVENT_OBJECT
-
-    for _ in range(n_handlers):
-        dispatcher.add_handler(EVENT_TYPE, handler)
-
-    await dispatcher()
-
-    assert handler_calls == n_handlers * n_events
+    nursery.start_soon(dispatcher)
+    with trio.move_on_after(5):
+        await dispatcher.sub(predicate)
+        pytest.fail('Unreachable')
