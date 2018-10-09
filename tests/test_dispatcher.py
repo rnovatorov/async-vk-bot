@@ -1,42 +1,50 @@
+from unittest.mock import Mock
+
 import trio
-import pytest
-
-from async_vk_bot.dispatcher import Dispatcher
 
 
-EVENT_TYPE = 'event_type'
-EVENT_OBJECT = 42
+async def test_one_subscriber(dispatcher, test_event, autojump_clock):
+    predicate = Mock()
+
+    async def subscriber(task_status=trio.TASK_STATUS_IGNORED):
+        task_status.started()
+        event = await dispatcher.wait(predicate)
+        assert event == test_event
+
+    async with trio.open_nursery() as nursery:
+        await nursery.start(subscriber)
+        await dispatcher.pub(test_event)
+
+    predicate.assert_called_once_with(test_event)
 
 
-async def event_gen():
-    await trio.sleep(1)
-    yield {
-        'type': EVENT_TYPE,
-        'object': EVENT_OBJECT
-    }
+async def test_multiple_subscribers(dispatcher, test_event, autojump_clock):
+    predicate = Mock()
+    n_subscribers = 4
+
+    async def subscriber(task_status=trio.TASK_STATUS_IGNORED):
+        task_status.started()
+        event = await dispatcher.wait(predicate)
+        assert event == test_event
+
+    async with trio.open_nursery() as nursery:
+        for _ in range(n_subscribers):
+            await nursery.start(subscriber)
+        await dispatcher.pub(test_event)
+
+    predicate.assert_called_with(test_event)
+    assert predicate.call_count == n_subscribers
 
 
-async def test_single_sub_true_predicate(nursery, autojump_clock):
-    dispatcher = Dispatcher(event_gen=event_gen)
+async def test_cancellation(dispatcher, test_event, autojump_clock):
+    timeout = 4
 
-    def predicate(event):
-        assert event['type'] == EVENT_TYPE
-        assert event['object'] == EVENT_OBJECT
-        return True
+    async def subscriber(task_status=trio.TASK_STATUS_IGNORED):
+        task_status.started()
+        with trio.move_on_after(timeout):
+            await dispatcher.wait(lambda _: False)
+        assert not dispatcher._buckets
 
-    nursery.start_soon(dispatcher)
-    await dispatcher.sub(predicate)
-
-
-async def test_single_sub_false_predicate(nursery, autojump_clock):
-    dispatcher = Dispatcher(event_gen=event_gen)
-
-    def predicate(event):
-        assert event['type'] == EVENT_TYPE
-        assert event['object'] == EVENT_OBJECT
-        return False
-
-    nursery.start_soon(dispatcher)
-    with trio.move_on_after(5):
-        await dispatcher.sub(predicate)
-        pytest.fail('Unreachable')
+    async with trio.open_nursery() as nursery:
+        await nursery.start(subscriber)
+        await dispatcher.pub(test_event)
