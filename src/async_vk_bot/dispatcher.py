@@ -22,7 +22,7 @@ class Dispatcher:
         with self._bucket() as bucket:
             async for event in bucket:
                 if predicate(event):
-                    return event
+                    yield event
 
     @contextmanager
     def _bucket(self):
