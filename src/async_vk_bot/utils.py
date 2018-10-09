@@ -1,6 +1,6 @@
-async def anext(aiterator):
-    return await aiterator.__anext__()
+async def anext(ait):
+    return await ait.__anext__()
 
 
-def aiter(item):
-    return item.__aiter__()
+def aiter(obj):
+    return obj.__aiter__()

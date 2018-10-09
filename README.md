@@ -19,10 +19,10 @@ import trio
 from async_vk_bot import Bot
 
 async def echo(bot):
-    async for msg in bot.event.message_new():
+    async for event in bot.sub(lambda e: e['type'] == 'message_new'):
         await bot.api.messages.send(
-            peer_id=msg['peer_id'],
-            message=msg['text']
+            peer_id=event['object']['peer_id'],
+            message=event['object']['text']
         )
 
 async def main():

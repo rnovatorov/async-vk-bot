@@ -3,16 +3,13 @@ from contextlib import contextmanager
 
 import trio
 
+from .utils import aiter, anext
+
 
 class Dispatcher:
 
-    def __init__(self, event_gen):
-        self._event_gen = event_gen
+    def __init__(self):
         self._subs = {}
-
-    async def __call__(self):
-        async for event in self._event_gen():
-            await self.pub(event)
 
     async def pub(self, event):
         for bucket in list(self._subs.values()):
@@ -23,6 +20,12 @@ class Dispatcher:
             async for event in bucket:
                 if predicate(event):
                     yield event
+
+    async def wait(self, predicate):
+        events = aiter(self.sub(predicate))
+        event = await anext(events)
+        await events.aclose()
+        return event
 
     @contextmanager
     def _bucket(self):
