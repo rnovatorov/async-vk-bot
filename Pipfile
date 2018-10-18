@@ -7,6 +7,8 @@ name = "pypi"
 async-vk-bot = {editable = true, path = "."}
 
 [dev-packages]
+pytest = "*"
+pytest-trio = "*"
 
 [requires]
 python_version = "3.7"
