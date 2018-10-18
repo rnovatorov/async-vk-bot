@@ -1,15 +1,12 @@
-from types import FunctionType
-from dataclasses import dataclass, field
-
 import trio
 
 
-@dataclass(unsafe_hash=True)
 class Subscriber:
 
-    predicate: FunctionType
-    sender: trio.abc.SendChannel = field(init=False)
-    receiver: trio.abc.ReceiveChannel = field(init=False)
+    def __init__(self, predicate):
+        self.predicate = predicate
+        self.sender = None
+        self.receiver = None
 
     async def __aenter__(self):
         self.sender, self.receiver = trio.open_memory_channel(0)

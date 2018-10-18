@@ -1,5 +1,5 @@
 __title__ = 'async-vk-bot'
-__version__ = '0.4.0'
+__version__ = '0.4.1'
 __description__ = 'Async VK bot builder'
 __url__ = 'https://github.com/Suenweek/async-vk-bot'
 __author__ = 'Roman Novatorov'

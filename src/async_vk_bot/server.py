@@ -1,5 +1,6 @@
-import asks
 from urllib.parse import urlencode
+
+import asks
 
 
 class Server:
