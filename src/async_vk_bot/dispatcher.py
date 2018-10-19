@@ -2,47 +2,40 @@ from contextlib import asynccontextmanager
 
 import trio
 
-from .utils import aiter, anext
-from .subscriber import Subscriber
+from .channel import Channel
 
 
 class Dispatcher:
 
     def __init__(self):
-        self._subs = set()
+        self._channels = set()
         self._lock = trio.Lock()
 
     async def pub(self, event):
         async with self._lock:
-            for sub in self._subs:
-                if sub.predicate(event):
-                    await sub.sender.send(event)
+            for channel in self._channels:
+                await channel.send(event)
 
     async def sub(self, predicate):
-        async with self._sub_scope(predicate) as sub:
-            async for event in sub.receiver:
-                yield event
+        async with self._open_channel() as channel:
+            async for event in channel:
+                if predicate(event):
+                    yield event
 
     async def wait(self, predicate):
-        events = aiter(self.sub(predicate))
-        event = await anext(events)
+        events = self.sub(predicate).__aiter__()
+        event = await events.__anext__()
         await events.aclose()
         return event
 
     @asynccontextmanager
-    async def _sub_scope(self, predicate):
-        async with Subscriber(predicate) as sub:
-            await self._add_sub(sub)
+    async def _open_channel(self):
+        async with Channel() as channel:
+            async with self._lock:
+                self._channels.add(channel)
             try:
-                yield sub
+                yield channel
             finally:
                 with trio.open_cancel_scope(shield=True):
-                    await self._remove_sub(sub)
-
-    async def _add_sub(self, sub):
-        async with self._lock:
-            self._subs.add(sub)
-
-    async def _remove_sub(self, sub):
-        async with self._lock:
-            self._subs.remove(sub)
+                    async with self._lock:
+                        self._channels.remove(channel)

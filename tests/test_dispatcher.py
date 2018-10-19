@@ -43,7 +43,7 @@ async def test_cancellation(dispatcher, test_event, autojump_clock):
         task_status.started()
         with trio.move_on_after(timeout):
             await dispatcher.wait(lambda _: False)
-        assert not dispatcher._subs
+        assert not dispatcher._channels
 
     async with trio.open_nursery() as nursery:
         await nursery.start(subscriber)
