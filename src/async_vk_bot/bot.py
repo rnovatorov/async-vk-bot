@@ -6,9 +6,9 @@ from .poller import Poller
 
 class Bot(Dispatcher):
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         super().__init__()
-        self.api = Api()
+        self.api = Api(*args, **kwargs)
         self.poller = Poller(api=self.api)
 
     async def __call__(self):
