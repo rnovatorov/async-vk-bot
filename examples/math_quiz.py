@@ -5,35 +5,6 @@ import trio
 from async_vk_bot import Bot
 
 
-class Dispatcher:
-
-    def __init__(self, bot, start_cmd='/math_quiz'):
-        self.bot = bot
-        self.start_cmd = start_cmd
-        self.peer_ids = set()
-
-    async def __call__(self):
-        async with trio.open_nursery() as nursery:
-            async for event in self.bot.sub(lambda e: (
-                e['type'] == 'message_new'
-                and
-                e['object']['text'] == self.start_cmd
-                and
-                e['object']['peer_id'] not in self.peer_ids
-            )):
-                await nursery.start(self.handle, event)
-
-    async def handle(self, event, task_status=trio.TASK_STATUS_IGNORED):
-        peer_id = event['object']['peer_id']
-        self.peer_ids.add(peer_id)
-
-        task_status.started()
-        math_quiz = MathQuiz(self.bot, peer_id)
-        await math_quiz.start()
-
-        self.peer_ids.remove(peer_id)
-
-
 class MathQuiz:
 
     def __init__(self, bot, peer_id, n_questions=5, difficulty=10):
@@ -44,9 +15,9 @@ class MathQuiz:
 
     async def start(self):
         score = 0
-        for q, a in self.generate_questions():
-            await self.send(q)
-            if a == await self.wait_answer():
+        for question, answer in self.generate_questions():
+            await self.send(question)
+            if answer == await self.wait_answer():
                 score += 1
         await self.send(f'Your score is {score}/{self.n_questions}.')
 
@@ -79,6 +50,35 @@ class MathQuiz:
             questions.append((question, answer))
 
         return questions
+
+
+class Dispatcher:
+
+    def __init__(self, bot, start_cmd='/math_quiz'):
+        self.bot = bot
+        self.start_cmd = start_cmd
+        self.peer_ids = set()
+
+    async def __call__(self):
+        async with trio.open_nursery() as nursery:
+            async for event in self.bot.sub(lambda e: (
+                e['type'] == 'message_new'
+                and
+                e['object']['text'] == self.start_cmd
+                and
+                e['object']['peer_id'] not in self.peer_ids
+            )):
+                await nursery.start(self.handle, event)
+
+    async def handle(self, event, task_status=trio.TASK_STATUS_IGNORED):
+        peer_id = event['object']['peer_id']
+        self.peer_ids.add(peer_id)
+
+        task_status.started()
+        math_quiz = MathQuiz(self.bot, peer_id)
+        await math_quiz.start()
+
+        self.peer_ids.remove(peer_id)
 
 
 async def main():
