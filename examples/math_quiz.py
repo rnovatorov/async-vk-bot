@@ -61,14 +61,15 @@ class Dispatcher:
 
     async def __call__(self):
         async with trio.open_nursery() as nursery:
-            async for event in self.bot.sub(lambda e: (
+            async with self.bot.sub(lambda e: (
                 e['type'] == 'message_new'
                 and
                 e['object']['text'] == self.start_cmd
                 and
                 e['object']['peer_id'] not in self.peer_ids
-            )):
-                await nursery.start(self.handle, event)
+            )) as events:
+                async for event in events:
+                    await nursery.start(self.handle, event)
 
     async def handle(self, event, task_status=trio.TASK_STATUS_IGNORED):
         peer_id = event['object']['peer_id']
