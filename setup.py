@@ -18,5 +18,8 @@ setup(
     url=about['__url__'],
     author=about['__author__'],
     author_email=about['__author_email__'],
-    install_requires=['async-vk-api']
+    install_requires=[
+        'async-vk-api',
+        'async_generator'
+    ]
 )

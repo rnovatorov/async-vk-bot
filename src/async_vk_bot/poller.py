@@ -2,6 +2,8 @@ from urllib.parse import urlencode
 
 import asks
 
+from .utils import aclosed
+
 
 DEFAULT_WAIT = 25
 ACT = 'a_check'
@@ -26,6 +28,7 @@ class Poller:
     def __call__(self):
         return self.poll()
 
+    @aclosed
     async def poll(self):
         await self._init()
         while True:

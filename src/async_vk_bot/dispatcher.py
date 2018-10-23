@@ -1,8 +1,8 @@
 from contextlib import asynccontextmanager
 
 import trio
-from async_generator import aclosing
 
+from .utils import aclosed
 from .sync import LockedSet, Channel
 
 
@@ -15,13 +15,12 @@ class Dispatcher:
         async for channel in self._channels:
             await channel.send(event)
 
-    def sub(self, predicate):
-        async def events():
-            async with self._open_channel() as channel:
-                async for event in channel:
-                    if predicate(event):
-                        yield event
-        return aclosing(events())
+    @aclosed
+    async def sub(self, predicate):
+        async with self._open_channel() as channel:
+            async for event in channel:
+                if predicate(event):
+                    yield event
 
     async def wait(self, predicate):
         async with self.sub(predicate) as events:

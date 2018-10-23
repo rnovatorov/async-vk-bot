@@ -12,5 +12,6 @@ class Bot(Dispatcher):
         self.poller = Poller(api=self.api)
 
     async def __call__(self):
-        async for event in self.poller():
-            await self.pub(event)
+        async with self.poller() as events:
+            async for event in events:
+                await self.pub(event)
