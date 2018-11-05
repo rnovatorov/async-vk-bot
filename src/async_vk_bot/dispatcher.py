@@ -3,17 +3,18 @@ from contextlib import asynccontextmanager
 import trio
 
 from .utils import aclosed
-from .locked_set import LockedSet
 
 
 class Dispatcher:
 
     def __init__(self):
-        self._ch_pairs = LockedSet()
+        self._lock = trio.Lock()
+        self._ch_pairs = set()
 
     async def pub(self, event):
-        async for ch_send, _ in self._ch_pairs:
-            await ch_send.send(event)
+        async with self._lock:
+            for ch_send, _ in self._ch_pairs:
+                await ch_send.send(event)
 
     @aclosed
     async def sub(self, predicate):
@@ -31,10 +32,15 @@ class Dispatcher:
     async def _open_channel(self):
         ch_pair = trio.open_memory_channel(0)
         ch_send, ch_recv = ch_pair
+
         async with ch_send, ch_recv:
-            await self._ch_pairs.add(ch_pair)
+            async with self._lock:
+                self._ch_pairs.add(ch_pair)
+
             try:
                 yield ch_pair
+
             finally:
                 with trio.open_cancel_scope(shield=True):
-                    await self._ch_pairs.remove(ch_pair)
+                    async with self._lock:
+                        self._ch_pairs.remove(ch_pair)

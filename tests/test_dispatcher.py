@@ -45,7 +45,7 @@ async def test_wait_cancellation(dispatcher, test_event, autojump_clock):
         task_status.started()
         with trio.move_on_after(timeout):
             await dispatcher.wait(predicate)
-        assert not dispatcher._ch_pairs._set
+        assert not dispatcher._ch_pairs
 
     async with trio.open_nursery() as nursery:
         await nursery.start(subscriber)
@@ -99,7 +99,7 @@ async def test_sub_cancellation(dispatcher, test_event, autojump_clock):
             async with dispatcher.sub(predicate) as events:
                 async for _ in events:
                     pytest.fail()
-        assert not dispatcher._ch_pairs._set
+        assert not dispatcher._ch_pairs
 
     async with trio.open_nursery() as nursery:
         await nursery.start(subscriber)

@@ -9,6 +9,7 @@ async-vk-bot = {editable = true, path = "."}
 [dev-packages]
 pytest = "*"
 pytest-trio = "*"
+pytest-cov = "*"
 
 [requires]
 python_version = "3.7"

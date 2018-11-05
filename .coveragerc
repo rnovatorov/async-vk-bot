@@ -1,0 +1,3 @@
+[run]
+omit =
+    */__about__.py
