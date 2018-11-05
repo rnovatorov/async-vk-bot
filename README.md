@@ -7,6 +7,12 @@ and [async-vk-api](https://github.com/Suenweek/async-vk-api).
 
 ## Installation
 
+#### Stable from PyPi
+```bash
+pip install async-vk-bot
+```
+
+#### Latest from Github
 ```bash
 pip install git+https://github.com/Suenweek/async-vk-bot#egg=async-vk-bot
 ```
