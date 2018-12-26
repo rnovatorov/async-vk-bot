@@ -17,14 +17,15 @@ class Dispatcher:
                 await ch_send.send(event)
 
     @aclosed
-    async def sub(self, predicate):
+    async def sub(self, predicate, task_status=trio.TASK_STATUS_IGNORED):
         async with self._open_channel() as (_, ch_recv):
+            task_status.started()
             async for event in ch_recv:
                 if predicate(event):
                     yield event
 
-    async def wait(self, predicate):
-        async with self.sub(predicate) as events:
+    async def wait(self, predicate, **kwargs):
+        async with self.sub(predicate, **kwargs) as events:
             async for event in events:
                 return event
 

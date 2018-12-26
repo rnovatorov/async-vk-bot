@@ -19,14 +19,11 @@ class Poller:
         self.api = api
         self.wait = wait
 
-        self._group_id = None
-
         self.server = None
         self.key = None
         self.ts = None
 
-    def __call__(self):
-        return self.poll()
+        self._group_id = None
 
     @aclosed
     async def poll(self):
@@ -35,6 +32,8 @@ class Poller:
             events = await self._wait_events()
             for event in events:
                 yield event
+
+    __call__ = poll
 
     async def _init(self):
         config = await self._get_config()

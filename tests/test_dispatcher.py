@@ -7,9 +7,8 @@ import pytest
 async def test_one_waiter(dispatcher, test_event, autojump_clock):
     predicate = Mock()
 
-    async def subscriber(task_status=trio.TASK_STATUS_IGNORED):
-        task_status.started()
-        event = await dispatcher.wait(predicate)
+    async def subscriber(**kwargs):
+        event = await dispatcher.wait(predicate, **kwargs)
         assert event == test_event
 
     async with trio.open_nursery() as nursery:
@@ -23,9 +22,8 @@ async def test_multiple_waiters(dispatcher, test_event, autojump_clock):
     predicate = Mock()
     n_subscribers = 4
 
-    async def subscriber(task_status=trio.TASK_STATUS_IGNORED):
-        task_status.started()
-        event = await dispatcher.wait(predicate)
+    async def subscriber(**kwargs):
+        event = await dispatcher.wait(predicate, **kwargs)
         assert event == test_event
 
     async with trio.open_nursery() as nursery:
@@ -41,10 +39,9 @@ async def test_wait_cancellation(dispatcher, test_event, autojump_clock):
     predicate = lambda _: False
     timeout = 4
 
-    async def subscriber(task_status=trio.TASK_STATUS_IGNORED):
-        task_status.started()
+    async def subscriber(**kwargs):
         with trio.move_on_after(timeout):
-            await dispatcher.wait(predicate)
+            await dispatcher.wait(predicate, **kwargs)
         assert not dispatcher._ch_pairs
 
     async with trio.open_nursery() as nursery:
@@ -55,9 +52,8 @@ async def test_wait_cancellation(dispatcher, test_event, autojump_clock):
 async def test_one_subscriber(dispatcher, test_event, autojump_clock):
     predicate = Mock()
 
-    async def subscriber(task_status=trio.TASK_STATUS_IGNORED):
-        task_status.started()
-        async with dispatcher.sub(predicate) as events:
+    async def subscriber(**kwargs):
+        async with dispatcher.sub(predicate, **kwargs) as events:
             async for event in events:
                 assert event == test_event
                 return
@@ -73,9 +69,8 @@ async def test_multiple_subscribers(dispatcher, test_event, autojump_clock):
     predicate = Mock()
     n_subscribers = 4
 
-    async def subscriber(task_status=trio.TASK_STATUS_IGNORED):
-        task_status.started()
-        async with dispatcher.sub(predicate) as events:
+    async def subscriber(**kwargs):
+        async with dispatcher.sub(predicate, **kwargs) as events:
             async for event in events:
                 assert event == test_event
                 return
@@ -93,10 +88,9 @@ async def test_sub_cancellation(dispatcher, test_event, autojump_clock):
     predicate = lambda _: False
     timeout = 4
 
-    async def subscriber(task_status=trio.TASK_STATUS_IGNORED):
-        task_status.started()
+    async def subscriber(**kwargs):
         with trio.move_on_after(timeout):
-            async with dispatcher.sub(predicate) as events:
+            async with dispatcher.sub(predicate, **kwargs) as events:
                 async for _ in events:
                     pytest.fail()
         assert not dispatcher._ch_pairs
