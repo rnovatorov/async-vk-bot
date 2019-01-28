@@ -21,11 +21,15 @@ pip install git+https://github.com/Suenweek/async-vk-bot#egg=async-vk-bot
 ## Usage
 
 ```python
+import os
+
 import trio
-from async_vk_bot import Bot
+import async_vk_api
+import async_vk_bot
 
 
-new_message = lambda event: event['type'] == 'message_new'
+def new_message(event):
+    return event['type'] == 'message_new'
 
 
 async def echo_once(bot):
@@ -55,7 +59,12 @@ async def main():
     """
     Starts the bot and event handlers.
     """
-    bot = Bot()
+    api = async_vk_api.make_api(
+        access_token=os.getenv('VK_API_ACCESS_TOKEN'),
+        version='5.89'
+    )
+    bot = async_vk_bot.make_bot(api)
+
     async with trio.open_nursery() as nursery:
         nursery.start_soon(bot)
         nursery.start_soon(echo, bot)
