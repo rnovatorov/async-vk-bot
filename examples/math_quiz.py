@@ -90,7 +90,6 @@ async def main():
         version='5.89',
     )
     bot = async_vk_bot.make_bot(api)
-
     router = Router(bot)
 
     async with trio.open_nursery() as nursery:
