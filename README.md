@@ -79,3 +79,8 @@ For the list of event types and objects see
 https://vk.com/dev/groups_events.
 
 For more usage see [examples](examples).
+
+
+## Bots built with async-vk-bot
+
+ - [vk-code-names](https://github.com/Suenweek/vk-code-names)
