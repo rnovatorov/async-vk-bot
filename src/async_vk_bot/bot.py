@@ -1,17 +1,29 @@
-from async_vk_api import Api
+class Bot:
 
-from .dispatcher import Dispatcher
-from .poller import Poller
+    def __init__(self, api, poller, dispatcher):
+        self._api = api
+        self._poller = poller
+        self._dispatcher = dispatcher
 
-
-class Bot(Dispatcher):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__()
-        self.api = Api(*args, **kwargs)
-        self.poller = Poller(api=self.api)
-
-    async def __call__(self):
-        async with self.poller() as events:
+    async def run(self):
+        async with self._poller() as events:
             async for event in events:
                 await self.pub(event)
+
+    __call__ = run
+
+    @property
+    def api(self):
+        return self._api
+
+    @property
+    def pub(self):
+        return self._dispatcher.pub
+
+    @property
+    def sub(self):
+        return self._dispatcher.sub
+
+    @property
+    def wait(self):
+        return self._dispatcher.wait

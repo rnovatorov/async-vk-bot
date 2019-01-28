@@ -1,6 +1,6 @@
 import pytest
 
-from async_vk_bot.dispatcher import Dispatcher
+import async_vk_bot
 
 
 @pytest.fixture()
@@ -13,4 +13,4 @@ def test_event():
 
 @pytest.fixture()
 async def dispatcher():
-    return Dispatcher()
+    return async_vk_bot.make_dispatcher()

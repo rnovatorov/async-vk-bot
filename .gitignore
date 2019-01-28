@@ -107,3 +107,6 @@ venv.bak/
 
 # Pipfile.lock
 Pipfile.lock
+
+# PyCharm
+.idea/

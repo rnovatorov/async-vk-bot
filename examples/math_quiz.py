@@ -1,8 +1,10 @@
+import os
 import random
 import operator
 
 import trio
-from async_vk_bot import Bot
+import async_vk_api
+import async_vk_bot
 
 
 class MathQuiz:
@@ -15,9 +17,9 @@ class MathQuiz:
 
     async def start(self):
         score = 0
-        for question, answer in self.generate_questions():
+        for question, correct_answer in self.generate_questions():
             await self.send(question)
-            if answer == await self.wait_answer():
+            if await self.wait_answer() == correct_answer:
                 score += 1
         await self.send(f'Your score is {score}/{self.n_questions}.')
 
@@ -52,7 +54,7 @@ class MathQuiz:
         return questions
 
 
-class Dispatcher:
+class Router:
 
     def __init__(self, bot, start_cmd='/math_quiz'):
         self.bot = bot
@@ -69,10 +71,10 @@ class Dispatcher:
                 e['object']['peer_id'] not in self.peer_ids
             )) as events:
                 async for event in events:
-                    await nursery.start(self.handle, event)
+                    peer_id = event['object']['peer_id']
+                    await nursery.start(self.math_quiz, peer_id)
 
-    async def handle(self, event, task_status=trio.TASK_STATUS_IGNORED):
-        peer_id = event['object']['peer_id']
+    async def math_quiz(self, peer_id, task_status=trio.TASK_STATUS_IGNORED):
         self.peer_ids.add(peer_id)
 
         task_status.started()
@@ -83,11 +85,17 @@ class Dispatcher:
 
 
 async def main():
-    bot = Bot()
-    dispatcher = Dispatcher(bot)
+    api = async_vk_api.make_api(
+        access_token=os.getenv('VK_API_ACCESS_TOKEN'),
+        version='5.89',
+    )
+    bot = async_vk_bot.make_bot(api)
+
+    router = Router(bot)
+
     async with trio.open_nursery() as nursery:
         nursery.start_soon(bot)
-        nursery.start_soon(dispatcher)
+        nursery.start_soon(router)
 
 
 if __name__ == '__main__':

@@ -5,7 +5,6 @@ import asks
 from .utils import aclosed
 
 
-DEFAULT_WAIT = 25
 ACT = 'a_check'
 
 ERRNO_HISTORY_OUTDATED = 1
@@ -15,7 +14,7 @@ ERRNO_DATA_LOST = 3
 
 class Poller:
 
-    def __init__(self, api, wait=DEFAULT_WAIT):
+    def __init__(self, api, wait=25):
         self.api = api
         self.wait = wait
 
