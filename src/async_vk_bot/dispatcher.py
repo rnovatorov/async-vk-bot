@@ -9,18 +9,19 @@ class Dispatcher:
 
     def __init__(self):
         self._lock = trio.Lock()
-        self._ch_pairs = set()
+        self._send_channels = set()
 
     async def pub(self, event):
         async with self._lock:
-            for ch_send, _ in self._ch_pairs:
-                await ch_send.send(event)
+            for send_channel in self._send_channels:
+                await send_channel.send(event)
 
     @aclosed
     async def sub(self, predicate, task_status=trio.TASK_STATUS_IGNORED):
-        async with self._open_channel() as (_, ch_recv):
+        async with self._open_channel() as recv_channel:
             task_status.started()
-            async for event in ch_recv:
+
+            async for event in recv_channel:
                 if predicate(event):
                     yield event
 
@@ -29,19 +30,22 @@ class Dispatcher:
             async for event in events:
                 return event
 
+    @property
+    def has_subs(self):
+        return len(self._send_channels) != 0
+
     @asynccontextmanager
     async def _open_channel(self):
-        ch_pair = trio.open_memory_channel(0)
-        ch_send, ch_recv = ch_pair
+        send_channel, recv_channel = trio.open_memory_channel(0)
 
-        async with ch_send, ch_recv:
+        async with send_channel, recv_channel:
             async with self._lock:
-                self._ch_pairs.add(ch_pair)
+                self._send_channels.add(send_channel)
 
             try:
-                yield ch_pair
+                yield recv_channel
 
             finally:
                 with trio.open_cancel_scope(shield=True):
                     async with self._lock:
-                        self._ch_pairs.remove(ch_pair)
+                        self._send_channels.remove(send_channel)

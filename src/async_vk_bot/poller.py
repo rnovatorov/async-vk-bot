@@ -1,7 +1,5 @@
 from urllib.parse import urlencode
 
-import asks
-
 from .utils import aclosed
 
 
@@ -14,8 +12,9 @@ ERRNO_DATA_LOST = 3
 
 class Poller:
 
-    def __init__(self, api, wait=25):
+    def __init__(self, api, session, wait=25):
         self.api = api
+        self.session = session
         self.wait = wait
 
         self.server = None
@@ -27,6 +26,7 @@ class Poller:
     @aclosed
     async def poll(self):
         await self._init()
+
         while True:
             events = await self._wait_events()
             for event in events:
@@ -35,14 +35,16 @@ class Poller:
     __call__ = poll
 
     async def _init(self):
+        self._group_id = await self._get_group_id()
         config = await self._get_config()
+
         self.server = config['server']
         self.key = config['key']
         self.ts = config['ts']
 
     async def _wait_events(self):
         url = self._make_url()
-        response = await asks.get(url)
+        response = await self.session.get(url)
         payload = response.json()
 
         errno = payload.get('failed')
@@ -68,18 +70,16 @@ class Poller:
 
         return []
 
-    async def _get_config(self):
-        group_id = await self._get_group_id()
-        config = await self.api.groups.getLongPollServer(
-            group_id=group_id
-        )
-        return config
-
     async def _get_group_id(self):
-        if self._group_id is None:
-            groups = await self.api.groups.getById()
-            self._group_id = groups[0]['id']
-        return self._group_id
+        groups = await self.api.groups.getById()
+        return groups[0]['id']
+
+    async def _get_config(self):
+        assert self._group_id is not None
+
+        return await self.api.groups.getLongPollServer(
+            group_id=self._group_id
+        )
 
     def _make_url(self):
         query = urlencode({

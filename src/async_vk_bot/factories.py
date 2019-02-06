@@ -1,3 +1,5 @@
+import asks
+
 from .bot import Bot
 from .poller import Poller
 from .dispatcher import Dispatcher
@@ -13,8 +15,15 @@ def make_bot(api, poller=None, dispatcher=None):
     return Bot(api=api, poller=poller, dispatcher=dispatcher)
 
 
-def make_poller(api, **kwargs):
-    return Poller(api=api, **kwargs)
+def make_poller(api, session=None, **kwargs):
+    if session is None:
+        session = make_session()
+
+    return Poller(api=api, session=session, **kwargs)
+
+
+def make_session(**kwargs):
+    return asks.Session(**kwargs)
 
 
 def make_dispatcher():
