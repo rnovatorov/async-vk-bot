@@ -1,11 +1,11 @@
 [![Build Status](https://travis-ci.com/Suenweek/async-vk-bot.svg?branch=master)](https://travis-ci.com/Suenweek/async-vk-bot)
+[![codecov](https://codecov.io/gh/Suenweek/async-vk-bot/branch/master/graph/badge.svg)](https://codecov.io/gh/Suenweek/async-vk-bot)
 
 # async-vk-bot
 
 Async VK bot builder built with
 [trio](https://github.com/python-trio/trio)
 and [async-vk-api](https://github.com/Suenweek/async-vk-api).
-
 
 ## Installation
 
@@ -18,7 +18,6 @@ pip install async-vk-bot
 ```bash
 pip install git+https://github.com/Suenweek/async-vk-bot#egg=async-vk-bot
 ```
-
 
 ## Usage
 
