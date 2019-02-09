@@ -36,10 +36,8 @@ async def main():
     """
     Starts the bot and event handlers.
     """
-    api = async_vk_api.make_api(
-        access_token=os.getenv('VK_API_ACCESS_TOKEN'),
-        version='5.89'
-    )
+    access_token = os.getenv('VK_API_ACCESS_TOKEN')
+    api = async_vk_api.make_api(access_token, version='5.89')
     bot = async_vk_bot.make_bot(api)
 
     async with trio.open_nursery() as nursery:

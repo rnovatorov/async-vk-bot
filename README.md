@@ -28,10 +28,8 @@ import trio
 import async_vk_api
 import async_vk_bot
 
-
 def new_message(event):
     return event['type'] == 'message_new'
-
 
 async def echo_once(bot):
     """
@@ -42,7 +40,6 @@ async def echo_once(bot):
         peer_id=event['object']['peer_id'],
         message=event['object']['text']
     )
-
 
 async def echo(bot):
     """
@@ -55,22 +52,18 @@ async def echo(bot):
                 message=event['object']['text']
             )
 
-
 async def main():
     """
     Starts the bot and event handlers.
     """
-    api = async_vk_api.make_api(
-        access_token=os.getenv('VK_API_ACCESS_TOKEN'),
-        version='5.89'
-    )
+    access_token = os.getenv('VK_API_ACCESS_TOKEN')
+    api = async_vk_api.make_api(access_token, version='5.89')
     bot = async_vk_bot.make_bot(api)
 
     async with trio.open_nursery() as nursery:
         nursery.start_soon(bot)
         nursery.start_soon(echo, bot)
         nursery.start_soon(echo_once, bot)
-
 
 if __name__ == '__main__':
     trio.run(main)
