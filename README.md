@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/Suenweek/async-vk-bot.svg?branch=master)](https://travis-ci.com/Suenweek/async-vk-bot)
+
 # async-vk-bot
 
 Async VK bot builder built with
