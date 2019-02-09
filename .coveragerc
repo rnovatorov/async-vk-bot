@@ -1,3 +1,2 @@
 [run]
-omit =
-    */__about__.py
+source = src/async_vk_bot
