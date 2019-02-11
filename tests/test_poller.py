@@ -1,7 +1,8 @@
 from unittest.mock import Mock
 
-import async_vk_api
-import async_vk_bot
+from async_vk_api.api import Api as _Api
+
+from async_vk_bot.factories import make_poller
 from async_vk_bot.poller import \
     ERRNO_HISTORY_OUTDATED, ERRNO_KEY_EXPIRED, ERRNO_DATA_LOST
 
@@ -20,10 +21,10 @@ class Session:
         return response
 
 
-class Api(async_vk_api.Api):
+class Api(_Api):
 
     def __init__(self):
-        pass
+        self._object_hook = None
 
     async def __call__(self, method_name, **params):
         method_name = method_name.replace('.', '_')
@@ -53,7 +54,7 @@ async def test_sanity():
         {'ts': 3, 'updates': [4]},
     ])
 
-    poller = async_vk_bot.make_poller(api=api, session=session)
+    poller = make_poller(api=api, session=session)
 
     assert poller.server is None
     assert poller.key is None

@@ -45,11 +45,11 @@ class Poller:
     async def _wait_events(self):
         url = self._make_url()
         response = await self.session.get(url)
-        payload = response.json()
+        payload = response.json(object_hook=self.api._object_hook)
 
-        errno = payload.get('failed')
-
-        if errno is None:
+        try:
+            errno = payload['failed']
+        except KeyError:
             self.ts = payload['ts']
             return payload['updates']
 

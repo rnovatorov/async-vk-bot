@@ -46,6 +46,6 @@ class Dispatcher:
                 yield recv_channel
 
             finally:
-                with trio.open_cancel_scope(shield=True):
+                with trio.CancelScope(shield=True):
                     async with self._lock:
                         self._send_channels.remove(send_channel)

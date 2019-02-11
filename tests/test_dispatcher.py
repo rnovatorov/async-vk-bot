@@ -3,18 +3,11 @@ from unittest.mock import Mock
 import trio
 import pytest
 
-import async_vk_bot
-
 
 TEST_EVENT = {
     'type': 'test_type',
     'object': 'test_object'
 }
-
-
-@pytest.fixture(name='dispatcher')
-async def fixture_dispatcher():
-    return async_vk_bot.make_dispatcher()
 
 
 async def test_one_waiter(dispatcher, autojump_clock):

@@ -28,8 +28,10 @@ import trio
 import async_vk_api
 import async_vk_bot
 
+
 def new_message(event):
     return event['type'] == 'message_new'
+
 
 async def echo_once(bot):
     """
@@ -41,6 +43,7 @@ async def echo_once(bot):
         message=event['object']['text']
     )
 
+
 async def echo(bot):
     """
     Waits for new messages and sends the received text back.
@@ -51,6 +54,7 @@ async def echo(bot):
                 peer_id=event['object']['peer_id'],
                 message=event['object']['text']
             )
+
 
 async def main():
     """
@@ -64,6 +68,7 @@ async def main():
         nursery.start_soon(bot)
         nursery.start_soon(echo, bot)
         nursery.start_soon(echo_once, bot)
+
 
 if __name__ == '__main__':
     trio.run(main)
