@@ -3,12 +3,12 @@ from setuptools import setup, find_packages
 
 setup(
     name='async-vk-bot',
-    version='0.9.2',
+    version='0.9.3',
     description='Async VK bot builder',
     packages=find_packages('src'),
     package_dir={'': 'src'},
     url='https://github.com/Suenweek/async-vk-bot',
     author='Roman Novatorov',
     author_email='roman.novatorov@gmail.com',
-    install_requires=['async-vk-api>=0.5.1', 'async_generator']
+    install_requires=['async-vk-api', 'async_generator']
 )

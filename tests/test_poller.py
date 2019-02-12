@@ -24,7 +24,7 @@ class Session:
 class Api(_Api):
 
     def __init__(self):
-        self._object_hook = None
+        pass
 
     async def __call__(self, method_name, **params):
         method_name = method_name.replace('.', '_')
