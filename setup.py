@@ -10,5 +10,5 @@ setup(
     url='https://github.com/Suenweek/async-vk-bot',
     author='Roman Novatorov',
     author_email='roman.novatorov@gmail.com',
-    install_requires=['async-vk-api', 'async_generator']
+    install_requires=['async-vk-api>=0.6.0', 'async_generator']
 )
