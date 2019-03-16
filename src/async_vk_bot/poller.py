@@ -45,7 +45,7 @@ class Poller:
     async def _wait_events(self):
         url = self._make_url()
         response = await self.session.get(url)
-        payload = response.json(object_hook=self.api._object_hook)
+        payload = response.json()
 
         try:
             errno = payload['failed']
